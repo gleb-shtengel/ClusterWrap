@@ -331,14 +331,16 @@ class janelia_lsf_cluster(_cluster):
 
         # set environment vars
         # prevent overthreading outside dask
-        tpw = 2*ncpus  # threads per worker
-        job_script_prologue = [
-            f"export MKL_NUM_THREADS={tpw}",
-            f"export NUM_MKL_THREADS={tpw}",
-            f"export OPENBLAS_NUM_THREADS={tpw}",
-            f"export OPENMP_NUM_THREADS={tpw}",
-            f"export OMP_NUM_THREADS={tpw}",
-        ]
+        # allow caller to override via kwargs
+        if "job_script_prologue" not in kwargs:
+            tpw = 2*ncpus  # threads per worker
+            kwargs["job_script_prologue"] = [
+                f"export MKL_NUM_THREADS={tpw}",
+                f"export NUM_MKL_THREADS={tpw}",
+                f"export OPENBLAS_NUM_THREADS={tpw}",
+                f"export OPENMP_NUM_THREADS={tpw}",
+                f"export OMP_NUM_THREADS={tpw}",
+            ]
 
         # set local and log directories
         CWD = os.getcwd()
@@ -366,7 +368,6 @@ class janelia_lsf_cluster(_cluster):
             mem=mem,
             walltime=walltime,
             cores=threads,
-            job_script_prologue=job_script_prologue,
             **kwargs,
         )
 
